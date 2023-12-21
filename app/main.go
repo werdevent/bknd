@@ -23,9 +23,9 @@ func main() {
 	ENV := os.Getenv("ENV")
 
 	if ENV == "DEV" {
-		os.Setenv("DB", "")
+		os.Setenv("DB", "mongodb+srv://j:rootroot@cluster0.rj0tg.mongodb.net/")
 	} else if ENV == "PROD" {
-		os.Setenv("DB", "")
+		os.Setenv("DB", "PENDING")
 	}
 
 	PORT, err := strconv.Atoi(os.Getenv("PORT"))
