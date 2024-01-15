@@ -17,7 +17,7 @@ func StartServer(cfg *Config) error {
 		WriteTimeout:      1 * time.Minute,
 	}
 
-	fmt.Printf("Server %s up and running in %s mode using PORT %d\n", cfg.Version, cfg.Env, cfg.PORT)
+	fmt.Printf("WERDEVENT Server %s up and running in %s mode using PORT %d\n", cfg.Version, cfg.Env, cfg.PORT)
 
 	return srv.ListenAndServe()
 }

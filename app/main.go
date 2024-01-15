@@ -6,15 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/GeorgeHN666/werdevent-backend/app/router"
+	"github.com/GeorgeHN666/werdevent-backend/app/routers"
 	"github.com/GeorgeHN666/werdevent-backend/app/server"
 )
 
 func init() {
 
-	os.Setenv("PORT", "8000")
+	os.Setenv("PORT", "8080")
 	os.Setenv("ENV", "DEV")
 	os.Setenv("VERSION", "1.0.0")
+	//MAIL VARIABLES
+	os.Setenv("sender-user", "contact@zkaia.com")
+	os.Setenv("sender-server", "ns106.hostgator.mx")
+	os.Setenv("sender-port", "465")
+	os.Setenv("sender-password", "log.Fatal(1$)")
+
+	os.Setenv("receiver-user", "")
+	os.Setenv("receiver-server", "")
+	os.Setenv("receiver-port", "")
+	os.Setenv("receiver-password", "")
 
 }
 
@@ -40,7 +50,7 @@ func main() {
 
 	cfg := &server.Config{
 		PORT:    PORT,
-		Handler: router.HandleRoutes(),
+		Handler: routers.HandleRoutes(),
 		Env:     ENV,
 		Version: os.Getenv("VERSION"),
 	}
