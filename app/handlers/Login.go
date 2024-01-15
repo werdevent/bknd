@@ -61,23 +61,32 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sign := models.Signature{
+		Sign:    models.SIGNATURE,
+		Type:    models.SIGN_TYPE,
+		Created: fmt.Sprintf("%v", time.Now().UnixNano()),
+	}
+
 	payload := &models.StandardCredential{
-		Signature: models.Signature{
-			Sign:    models.SIGNATURE,
-			Type:    models.SIGN_TYPE,
-			Created: fmt.Sprintf("%v", time.Now().UnixNano()),
-		},
-		Payload: encryptedData,
+		Signature: sign,
+		Payload:   encryptedData,
+	}
+
+	Access := &models.AccessCredentials{
+		Signature: sign,
+		Role:      int64(u.Role),
 	}
 
 	var res struct {
 		Error   bool                       `json:"error"`
 		Message string                     `json:"message"`
 		Payload *models.StandardCredential `json:"payload"`
+		Access  *models.AccessCredentials  `json:"access"`
 	}
 	res.Error = false
 	res.Message = fmt.Sprintf("Successfully login - %v", constants.SUCCESSFUL)
 	res.Payload = payload
+	res.Access = Access
 
 	encoders.WriteJSON(w, res, http.StatusOK)
 }
