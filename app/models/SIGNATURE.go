@@ -8,4 +8,7 @@ type Signature struct {
 	Sign    string `json:"sign"`
 	Type    string `json:"type"`
 	Created string `json:"created"`
+	UI      string `json:"ui"`
+	BI      string `json:"bi"`
+	CI      string `json:"CI"`
 }

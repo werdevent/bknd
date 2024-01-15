@@ -43,50 +43,49 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	// send required models
 
-	data, err := json.Marshal(models.InternalPaylod{
+	data := models.InternalPaylod{
 		Name:  user.Name,
 		Email: user.Email,
-		UI:    user.ID.Hex(),
-		BI:    user.Consumer.Buyer_ID,
-		CI:    user.Consumer.Creator_ID,
-	})
+	}
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Internal error - %v", constants.INTERNAL_ERROR), http.StatusInternalServerError)
 		return
 	}
 
-	encryptedData, err := encoders.EncryptPayload(string(data), []byte(models.PKEY))
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Internal error - %v", constants.INTERNAL_ERROR), http.StatusInternalServerError)
-		return
-	}
-
-	sign := models.Signature{
+	sign, err := json.Marshal(models.Signature{
 		Sign:    models.SIGNATURE,
 		Type:    models.SIGN_TYPE,
 		Created: fmt.Sprintf("%v", time.Now().UnixNano()),
+		UI:      user.ID.Hex(),
+		BI:      user.Consumer.Buyer_ID,
+		CI:      user.Consumer.Creator_ID,
+	})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		return
+	}
+
+	encryptedData, err := encoders.EncryptPayload(string(sign), []byte(models.PKEY))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Internal error - %v", constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		return
 	}
 
 	payload := &models.StandardCredential{
-		Signature: sign,
-		Payload:   encryptedData,
-	}
-
-	Access := &models.AccessCredentials{
-		Signature: sign,
+		Signature: encryptedData,
+		Payload:   data,
 		Role:      int64(u.Role),
+		Logged:    true,
 	}
 
 	var res struct {
 		Error   bool                       `json:"error"`
 		Message string                     `json:"message"`
 		Payload *models.StandardCredential `json:"payload"`
-		Access  *models.AccessCredentials  `json:"access"`
 	}
 	res.Error = false
 	res.Message = fmt.Sprintf("Successfully login - %v", constants.SUCCESSFUL)
 	res.Payload = payload
-	res.Access = Access
 
 	encoders.WriteJSON(w, res, http.StatusOK)
 }
