@@ -48,10 +48,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		Name:  user.Name,
 		Email: user.Email,
 	}
-	if err != nil {
-		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("Internal error - %v", constants.INTERNAL_ERROR)), http.StatusInternalServerError)
-		return
-	}
 
 	sign, err := json.Marshal(models.Signature{
 		Sign:    models.SIGNATURE,
