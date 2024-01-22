@@ -9,6 +9,7 @@ import (
 	"github.com/GeorgeHN666/werdevent-backend/app/encoders"
 	"github.com/GeorgeHN666/werdevent-backend/app/mailer"
 	"github.com/GeorgeHN666/werdevent-backend/app/models"
+	"github.com/GeorgeHN666/werdevent-backend/app/utils"
 	"github.com/GeorgeHN666/werdevent-backend/constants"
 )
 
@@ -19,19 +20,19 @@ func StartRecoveryProcess(w http.ResponseWriter, r *http.Request) {
 	// check if user exist
 	user, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// create code
 	code, err := encoders.GenerateStandardCode(6)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// save code
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateUserDetails(user.ID.Hex(), &models.User{Recovery_Code: code, Valid_Code: true})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// send code through email
@@ -39,7 +40,7 @@ func StartRecoveryProcess(w http.ResponseWriter, r *http.Request) {
 	data["Code"] = code
 	err = mailer.SendStandardEmail(user.Email, "Codigo de verificacion", data, "email-templates/code.html")
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 
@@ -62,30 +63,30 @@ func ValidateRecoveryCode(w http.ResponseWriter, r *http.Request) {
 	// get user
 	user, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// validete code
 	if !user.Valid_Code {
-		http.Error(w, fmt.Sprintf("Invalid code - %v", constants.EXPIRED), http.StatusForbidden)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("Invalid code - %v", constants.EXPIRED)), http.StatusForbidden)
 		return
 	}
 
 	if user.Recovery_Code != code {
-		http.Error(w, fmt.Sprintf("Incorrect data - %v", constants.INCORRECT_DATA), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("Incorrect data - %v", constants.INCORRECT_DATA)), http.StatusNotAcceptable)
 		return
 	}
 
 	// generate another code
 	Authcode, err := encoders.GenerateAlphanumericCode(8)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateUserDetails(user.ID.Hex(), &models.User{Recovery_Code: Authcode, Valid_Code: true})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 
@@ -112,38 +113,38 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	var u models.User
 	err := encoders.ReadJSON(r, &u)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INCORRECT_DATA), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INCORRECT_DATA)), http.StatusNotAcceptable)
 		return
 	}
 
 	// get user
 	user, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// validate code
 	if !user.Valid_Code {
-		http.Error(w, fmt.Sprintf("Invalid code - %v", constants.EXPIRED), http.StatusForbidden)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("Invalid code - %v", constants.EXPIRED)), http.StatusForbidden)
 		return
 	}
 
 	if user.Recovery_Code != code {
-		http.Error(w, fmt.Sprintf("Incorrect data - %v", constants.INCORRECT_DATA), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("Incorrect data - %v", constants.INCORRECT_DATA)), http.StatusNotAcceptable)
 		return
 	}
 
 	// encrypt pwd
 	pwd, err := encoders.HashPassword(u.Password)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INCORRECT_DATA), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INCORRECT_DATA)), http.StatusNotAcceptable)
 		return
 	}
 
 	// save pwd
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateUserDetails(user.ID.Hex(), &models.User{Password: pwd, Valid_Code: false, Recovery_Code: "?????????????"})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
 		return
 	}
 

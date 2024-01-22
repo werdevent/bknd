@@ -8,6 +8,7 @@ import (
 	db "github.com/GeorgeHN666/werdevent-backend/app/DB"
 	"github.com/GeorgeHN666/werdevent-backend/app/encoders"
 	"github.com/GeorgeHN666/werdevent-backend/app/models"
+	"github.com/GeorgeHN666/werdevent-backend/app/utils"
 	"github.com/GeorgeHN666/werdevent-backend/constants"
 )
 
@@ -18,13 +19,13 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request) {
 
 	err := encoders.ReadJSON(r, &Location)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.PAYLOAD_ERROR), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.PAYLOAD_ERROR)), http.StatusNotAcceptable)
 		return
 	}
 
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateLocation(uid, &Location)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 

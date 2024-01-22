@@ -20,7 +20,7 @@ func UpdateConsumerDetails(w http.ResponseWriter, r *http.Request) {
 
 	err := encoders.ReadJSON(r, &details)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.PAYLOAD_ERROR), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.PAYLOAD_ERROR)), http.StatusNotAcceptable)
 		return
 	}
 
@@ -28,7 +28,7 @@ func UpdateConsumerDetails(w http.ResponseWriter, r *http.Request) {
 
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateConsumerDetails(uuid, filteredModel)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 

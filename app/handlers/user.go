@@ -9,6 +9,7 @@ import (
 	"github.com/GeorgeHN666/werdevent-backend/app/encoders"
 	"github.com/GeorgeHN666/werdevent-backend/app/mailer"
 	"github.com/GeorgeHN666/werdevent-backend/app/models"
+	"github.com/GeorgeHN666/werdevent-backend/app/utils"
 	"github.com/GeorgeHN666/werdevent-backend/constants"
 )
 
@@ -19,13 +20,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err := encoders.ReadJSON(r, &user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR), http.StatusConflict)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR)), http.StatusConflict)
 		return
 	}
 
 	userData, _ := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(user.Email)
 	if userData != nil {
-		http.Error(w, fmt.Sprintf("User exist - %v ", constants.ALREADY_EXIST), http.StatusFound)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("User exist - %v ", constants.ALREADY_EXIST)), http.StatusFound)
 		return
 	}
 
@@ -35,14 +36,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	user.Verified = false
 	hash, err := encoders.HashPassword(user.Password)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR), http.StatusConflict)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR)), http.StatusConflict)
 		return
 	}
 	user.Password = hash
 	// insert user
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).InsertUser(&user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 	// send code
@@ -50,7 +51,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	data["Code"] = code
 	err = mailer.SendStandardEmail(user.Email, "Codigo de verificacion", data, "email-templates/code.html")
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 
@@ -73,17 +74,17 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 	userData, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if userData == nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.NO_FOUNDED), http.StatusNotFound)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.NO_FOUNDED)), http.StatusNotFound)
 		return
 	}
 
 	if !userData.Valid_Code {
-		http.Error(w, fmt.Sprintf("expired - %v", constants.EXPIRED), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("expired - %v", constants.EXPIRED)), http.StatusNotAcceptable)
 		return
 	}
 
 	if userData.Recovery_Code != code {
-		http.Error(w, fmt.Sprintf("error with code - %v", constants.INCORRECT_DATA), http.StatusNotAcceptable)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("error with code - %v", constants.INCORRECT_DATA)), http.StatusNotAcceptable)
 		return
 	}
 
@@ -95,7 +96,7 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateUserDetails(userData.ID.Hex(), &user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error while updating: %v - %v ", err.Error(), constants.INTERNAL_ERROR), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("error while updating: %v - %v ", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
 		return
 	}
 
@@ -118,7 +119,7 @@ func UpdateUserDetails(w http.ResponseWriter, r *http.Request) {
 
 	err := encoders.ReadJSON(r, &user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR), http.StatusConflict)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v ", err.Error(), constants.PAYLOAD_ERROR)), http.StatusConflict)
 		return
 	}
 
@@ -129,7 +130,7 @@ func UpdateUserDetails(w http.ResponseWriter, r *http.Request) {
 
 	err = db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).UpdateUserDetails(uid, &user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR), http.StatusBadRequest)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusBadRequest)
 		return
 	}
 
