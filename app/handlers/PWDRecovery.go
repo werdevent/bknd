@@ -20,7 +20,7 @@ func StartRecoveryProcess(w http.ResponseWriter, r *http.Request) {
 	// check if user exist
 	user, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if err != nil {
-		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.NO_FOUNDED)), http.StatusInternalServerError)
 		return
 	}
 	// create code
@@ -63,7 +63,7 @@ func ValidateRecoveryCode(w http.ResponseWriter, r *http.Request) {
 	// get user
 	user, err := db.StartDatabase(os.Getenv("DB"), constants.DATABASE_NAME).GetUser(email)
 	if err != nil {
-		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.Internal_DB_ERROR)), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.NO_FOUNDED)), http.StatusInternalServerError)
 		return
 	}
 	// validete code
