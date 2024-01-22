@@ -71,7 +71,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	payload := &models.StandardCredential{
 		Signature: encryptedData,
 		Payload:   data,
-		Role:      int64(u.Role),
+		Role:      int64(user.Role),
 		Logged:    true,
 	}
 
