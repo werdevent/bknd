@@ -40,7 +40,7 @@ func StartRecoveryProcess(w http.ResponseWriter, r *http.Request) {
 	data["Code"] = code
 	err = mailer.SendStandardEmail(user.Email, "Codigo de verificacion", data, "email-templates/code.html")
 	if err != nil {
-		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusInternalServerError)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INVALID_ADDRESS)), http.StatusInternalServerError)
 		return
 	}
 

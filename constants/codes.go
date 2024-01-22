@@ -14,3 +14,4 @@ const SUCCESSFUL = 150
 const EXPIRED = 8131
 const INCORRECT_DATA = 9462
 const Internal_DB_ERROR = 3985
+const INVALID_ADDRESS = 6215
