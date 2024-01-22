@@ -33,7 +33,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	// check pwd
 	match, err := encoders.CompareHashedPWD(user.Password, u.Password)
 	if err != nil {
-		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.INTERNAL_ERROR)), http.StatusForbidden)
+		http.Error(w, utils.ThrowJSONerror(fmt.Sprintf("%v - %v", err.Error(), constants.BAD_CREDENTIALS)), http.StatusForbidden)
 		return
 	}
 
